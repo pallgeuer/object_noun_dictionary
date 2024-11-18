@@ -10,7 +10,7 @@ The aim of the Object Noun Dictionary is to provide a reference dictionary for i
 
 ## Citation
 
-The associated WACV 2025 paper is available on [arXiv](https://www.arxiv.org/abs/2407.11211). If you use this project in your research, please cite this GitHub repository as well as the paper:
+The associated WACV 2025 paper is available on [arXiv](https://www.arxiv.org/abs/2407.11211) (see Section 3.2 and Appendix B). If you use this project in your research, please cite this GitHub repository as well as the paper:
 
 ```bibtex
 @Misc{github_object_noun_dict,

@@ -1,0 +1,11 @@
+SUV
+sedan
+hatchback
+convertible
+coupe
+wagon
+cab
+hybrid, hybrid car
+van
+cargo van
+minivan

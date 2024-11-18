@@ -1,0 +1,8 @@
+car
+van
+truck
+pedestrian
+person sitting, person
+cyclist
+tram
+miscellaneous

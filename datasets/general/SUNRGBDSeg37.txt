@@ -1,0 +1,37 @@
+indoor wall
+indoor floor
+cabinet
+bed
+chair
+sofa
+table
+door
+window
+bookshelf
+picture
+counter
+blinds
+desk
+shelves
+curtain
+dresser
+pillow
+mirror
+floor mat
+human clothes
+indoor ceiling
+books
+fridge
+tv
+piece of paper
+towel
+shower curtain
+box
+whiteboard
+person
+night stand
+toilet
+sink
+lamp
+bathtub
+bag

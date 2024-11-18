@@ -1,0 +1,15 @@
+SUV
+sedan
+hatchback
+convertible
+coupe
+wagon
+regular cab
+crew cab
+quad cab
+club cab
+extended cab
+hybrid, hybrid car
+van
+cargo van
+minivan

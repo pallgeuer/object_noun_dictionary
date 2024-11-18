@@ -1,0 +1,223 @@
+WordNet
+=======
+
+- Initialise directory:
+	mkdir /PATH/TO
+	cd /PATH/TO
+
+- Clone this repository:
+	git clone git@github.com:pallgeuer/object_noun_dictionary.git
+
+- Download WordNet 3.0:
+	wget https://wordnetcode.princeton.edu/3.0/WordNet-3.0.tar.gz
+	tar -xf WordNet-3.0.tar.gz
+	mv WordNet-3.0 WordNet
+	rm WordNet-3.0.tar.gz
+
+- Upgrade to WordNet 3.1:
+	wget https://wordnetcode.princeton.edu/wn3.1.dict.tar.gz
+	mv WordNet/dict WordNet/dict-3.0
+	cp -r WordNet/dict-3.0 WordNet/dict-3.1
+	tar -xf wn3.1.dict.tar.gz -C WordNet
+	mv -vf WordNet/dict/* WordNet/dict-3.1/
+	rm -r WordNet/dict
+	ln -s dict-3.1 WordNet/dict
+	rm wn3.1.dict.tar.gz
+
+- Compile WordNet:
+	mkdir build
+	( export CFLAGS=-DUSE_INTERP_RESULT; cd WordNet && ./configure --prefix="$(realpath ../build)" && make && make clean && make install; )
+
+- Test WordNet:
+	export WNHOME="$(pwd)"/build
+	AddToPath "$(pwd)"/build/bin
+	# xdg-open "$WNHOME"/doc/pdf/wn.1.pdf
+	wn cow -hypen
+	wnb
+
+- Standoff files:
+	- Prepare:
+		mkdir standoff
+	- Semantically annotated gloss corpus:
+		wget https://wordnetcode.princeton.edu/glosstag-files/WordNet-3.0-glosstag.tar.gz
+		tar -xf WordNet-3.0-glosstag.tar.gz -C standoff
+		mv standoff/WordNet-3.0/* WordNet/
+		rm -r standoff/WordNet-3.0
+		rm WordNet-3.0-glosstag.tar.gz
+	- Evocation database:
+		wget https://wordnet.cs.princeton.edu/downloads/evocation.zip
+		unzip evocation.zip -d WordNet
+		rm evocation.zip
+		wget -P WordNet/evocation https://wordnet.cs.princeton.edu/downloads/5K.clean.txt
+		wget -P WordNet/evocation https://wordnet.cs.princeton.edu/downloads/1K.clean.txt
+	- Morphosemantic database:
+		wget -P standoff https://wordnetcode.princeton.edu/standoff-files/morphosemantic-links-README.txt
+		wget -P standoff https://wordnetcode.princeton.edu/standoff-files/morphosemantic-links.xls
+	- Telelogical database:
+		wget -P standoff https://wordnetcode.princeton.edu/standoff-files/teleological-links-README.txt
+		wget -P standoff https://wordnetcode.princeton.edu/standoff-files/teleological-links.xls
+	- Core WordNet:
+		wget -P standoff https://wordnetcode.princeton.edu/standoff-files/core-wordnet.txt
+	- Logical forms of the glosses (core WordNet nouns):
+		wget -P standoff https://wordnetcode.princeton.edu/standoff-files/cwn-noun-lfs.txt
+	- Logical forms of the glosses (all WordNet):
+		wget https://wordnetcode.princeton.edu/standoff-files/wn30-lfs.zip
+		unzip wn30-lfs.zip -d standoff
+		rm wn30-lfs.zip
+
+- Tools:
+	grind (NOT compiling without manual fixes):
+		wget https://wordnetcode.princeton.edu/tools/grind/WNgrind-3.0.tar.gz
+		tar -xf WNgrind-3.0.tar.gz
+		mv WNgrind-3.0 WNgrind
+		sudo apt install bison  # <-- For yacc
+		( cd WNgrind && ./configure --prefix="$(realpath ../build)" && make && make clean && make install; )
+		rm WNgrind-3.0.tar.gz
+	morphy:
+		wget https://wordnetcode.princeton.edu/tools/morphy.tgz
+		mkdir morphy && tar -xf morphy.tgz -C morphy
+		kwrite morphy/Makefile
+			LIBDIR=$(WNHOME)/lib
+			WNLIBS=$(LIBDIR)/libWN.a
+			LIBS=-lWN
+		( cd morphy && make && make clean && make install; )
+		rm morphy.tgz
+
+- NLTK Python:
+	conda create -n wordnet python=3.10
+	conda activate wordnet
+	conda install -c conda-forge 'nltk>=3.8' inflect 'pydantic>=1.10'
+	sudo "$(which python)" -m nltk.downloader -d /usr/local/share/nltk_data omw-1.4 wordnet wordnet31
+	python
+		from nltk.corpus import wordnet
+		synsets = wordnet.synsets('car')
+		synonyms = [syn.lemmas()[0].name() for syn in synsets]
+		print(synonyms)
+		synsets = [wordnet.synset('book.n.02')]
+		while synsets:
+			print(synsets[0])
+			synsets = synsets[0].hypernyms()  # <-- Hypernyms move to parents in the hierarchy (hyponyms the other way)
+
+- English word frequencies:
+	# Reference: http://norvig.com/ngrams
+	#            https://www.kaggle.com/datasets/rtatman/english-word-frequency
+	#            https://catalog.ldc.upenn.edu/LDC2006T13
+	#   Summary: Frequencies of most common uncased unigrams/bigrams from Google Web 1T 5-gram (2006)
+	wget -P word_freqs http://norvig.com/ngrams/count_1w.txt      # <-- The 1/3 million most frequent words, all lowercase, with counts.
+	wget -P word_freqs http://norvig.com/ngrams/count_2w.txt      # <-- The 1/4 million most frequent two-word (mixed case, rare unicode) bigrams, with counts.
+	cat word_freqs/count_1w.txt word_freqs/count_2w.txt | sort -t$'\t' -k2 -n -r > word_freqs/count_1w2w.txt
+	# Reference: https://www.wordfrequency.info
+	#            https://www.wordandphrase.info/frequencyList.asp
+	# Summary:   Corpus of Contemporary American English (COCA) top 60000 lemmas (status 2012)
+
+- Dataset class frequencies:
+	Collate:
+		mkdir wordnet_scripts/datasets
+		# Source:   https://paperswithcode.com/datasets?q=&v=lst&o=cited&mod=images&lang=english
+		# Resource: https://image-net.org/challenges/LSVRC/2017/browse-synsets
+	File format:
+		Comma-separated but need to strip whitespace from each cell after splitting
+		All terms should be lowercased except for proper nouns
+		Test the involved characters:
+			cd wordnet_scripts/datasets
+			grep -rnl $'\r' general objects          # <-- Don't want \r line endings
+			ag "[^-a-zA-Z0-9 ',\n]" general objects  # <-- See which non-standard characters are involved
+	Intended use:
+		Ignore files starting with '_'
+		Treat comma-separated values on the same line as completely independent terms (sometimes they're not identical, e.g. red wolf vs maned wolf, bell chime vs wind chime)
+		Terms might have incorrect case or be plural or be an alt-form => Case-insensitive match against all reference WordNet forms and if there is ONLY a plural match then replace with singular non-alt form => Only hopefully the singular form is repeated
+		Deduplicate data within a file (e.g. lines 'rail', 'railing' and 'railing, rail' occurs, also 'tablecloth', 'tablecloths')
+		Be flexible in matching words with regard to ' ' vs '-' vs '/' vs '.' etc... (e.g. Black footed Albatross == black-footed albatross, St. Bernard == St Bernard, S.U.V. == SUV, saints' == saints)
+		Datasets in 'objects' folder have all of their terms included regardless of whether in WordNet or not
+		Datasets in 'general' folder have all of their terms filtered by the acceptable WordNet ones => Strictly filter by selected WordNet terms (so that there is no incorporation of terms like 'swimming', 'diet', 'Ethiopian')
+		Selected WordNet object noun list has log-freqs like 4.193 => Train this noun 4 times for every 1 time an unknown word is trained (or train 4/M times for M the total number of singular, altname, plural forms, where the output is ALWAYS the singular term, if uneven then prefer to distribute to items at start of row, i.e. singular, altname, etc)
+		For a term in a dataset with N lines (but possibly more than N terms because more than one per line), each term has its log-freq set to at least that of the Nth most frequent object noun in the WordNet list. If there are multiple terms in the same row then you subtract log(K) for K terms in the row.
+		Round all log-freqs to the nearest integer >= 1 and create a dataset simply by repeating each term that many times and random shuffling the whole thing
+		Different terms share in linear space (slight reduction) / Plurals and altnames share in log space (large reduction)
+		MANUALLY VERIFY which classes are added to WordNet via datasets in the 'objects' folder
+
+- OpenImages V7 class map:
+	import re
+	import csv
+	with open('helpers/OpenImagesV7ClassMap.csv', 'r') as file:
+		classmap = {key.strip(): value.strip() for key, value in csv.reader(file)}
+	print(len(classmap))  # --> 20931
+	assert all(re.match(r'^/(m|g|oi)/', key) for key in classmap.keys())
+	print('\n'.join([value for value in classmap.values() if re.search(r'[^-a-zA-Z0-9 ]', value)]))
+	print(''.join(sorted(char for char in {char for value in classmap.values() for char in value} if not (char.isascii() and char.isalnum()))))  # <-- <space>',-./
+
+- Noun alternates:
+	# UNEXPLORED: https://github.com/itkach/slob/wiki/Dictionaries
+	American-British alternates:
+		# URL: https://github.com/hyperreality/American-British-English-Translator
+		mkdir wordnet_scripts/datasets/alternates
+		wget -P wordnet_scripts/datasets/alternates https://raw.githubusercontent.com/hyperreality/American-British-English-Translator/master/data/american_spellings.json https://raw.githubusercontent.com/hyperreality/American-British-English-Translator/master/data/british_spellings.json
+	StarDict dict.org alternates:
+		# URL: http://download.huzheng.org/dict.org = The Collaborative International Dictionary of English	tarball	GPL, 35M, 174222 words
+		wget -P wordnet_scripts/datasets/alternates http://download.huzheng.org/dict.org/stardict-dictd_www.dict.org_gcide-2.4.2.tar.bz2
+		tar -xf wordnet_scripts/datasets/alternates/stardict-dictd_www.dict.org_gcide-2.4.2.tar.bz2 -C wordnet_scripts/datasets/alternates
+		mv wordnet_scripts/datasets/alternates/stardict-dictd_www.dict.org_gcide-2.4.2  wordnet_scripts/datasets/alternates/stardict
+		rm wordnet_scripts/datasets/alternates/stardict-dictd_www.dict.org_gcide-2.4.2.tar.bz2
+	Preprocess StarDict with pyglossary:
+		git clone https://github.com/ilius/pyglossary.git
+		conda activate wordnet
+		python pyglossary/main.py wordnet_scripts/datasets/alternates/stardict/dictd_www.dict.org_gcide.ifo wordnet_scripts/datasets/alternates/stardict/dictd_www.dict.org_gcide_orig.tsv
+		patch --output wordnet_scripts/datasets/alternates/stardict/dictd_www.dict.org_gcide.tsv wordnet_scripts/datasets/alternates/stardict/dictd_www.dict.org_gcide_orig.tsv wordnet_scripts/datasets/alternates/stardict_tsv.patch
+	Inspect current differences:
+		kompare wordnet_scripts/datasets/alternates/stardict/dictd_www.dict.org_gcide_orig.tsv wordnet_scripts/datasets/alternates/stardict/dictd_www.dict.org_gcide.tsv
+	To update the patch:
+		colordiff -u wordnet_scripts/datasets/alternates/stardict/dictd_www.dict.org_gcide_orig.tsv wordnet_scripts/datasets/alternates/stardict/dictd_www.dict.org_gcide.tsv > wordnet_scripts/datasets/alternates/stardict_tsv.patch
+
+Noun Curation
+-------------
+
+- All of the following is in the conda env:
+	conda activate wordnet
+	cd /PATH/TO/object_noun_dictionary
+
+- Generate a proper merge of the word frequency files:
+	./merge_gram_freqs.py ../word_freqs/count_1w.txt ../word_freqs/count_2w.txt ../word_freqs/gram_freqs.tsv
+
+- Select synsets from the WordNet hierarchy with the help of lexical noun classes:
+	List all lexnames:
+		grep 'noun\.' ../WordNet/dict-3.1/lexnames
+	Show hierarchy tree for each lexname and decide whether to SELECT or IGNORE, for example:
+		./select_nouns.py --lextree artifact
+		# SELECT: animal artifact body event feeling food object person phenomenon plant possession
+		# IGNORE: Tops act attribute cognition communication group location motive process quantity relation shape state substance time
+	Save the colored joint WordNet hierarchy of all considered lexnames:
+		sudo apt install aha
+		./select_nouns.py --lextree animal artifact body event feeling food object person phenomenon plant possession | aha > datasets/object_noun_lextree.html
+	Go through saved lextree and construct an object noun select file:
+		kwrite datasets/object_noun_synset_spec.txt
+			L animal          # <-- Allow lexname 'animal'
+			E enclosure.n.03  # <-- Force exclude single synset (takes precedence over n/y/e)
+			I cell.n.01       # <-- Force include single synset (takes precedence over n/y)
+			N scenery.n.01    # <-- Recursive exclude synset tree
+			Y pancake.n.01    # <-- Recursive include synset tree (takes precedence over n)
+			# Note: 'n entity.n.01' is implicitly assumed
+			# Note: Multiple can be specified, e.g. IN, EY
+		For example:
+			L animal
+			L artifact
+			L body
+			L event
+			L feeling
+			L food
+			L object
+			L person
+			L phenomenon
+			L plant
+			L possession
+			EY object.n.01
+	Generate an explicit list of all selected synsets:
+		./select_nouns.py --synset_spec datasets/object_noun_synset_spec.txt datasets/object_noun_synset_list.txt
+
+- Curate an object noun list from a synset list and dataset classes:
+	Curate an object noun list:
+		./select_nouns.py --curate datasets/object_noun_synset_list.txt --curate_outfile datasets/object_noun_curated.json --curate_manual datasets/object_noun_manual_lemmas.txt --curate_alternates datasets/alternates/stardict/dictd_www.dict.org_gcide.tsv --curate_spellings datasets/alternates/american_spellings.json datasets/alternates/british_spellings.json --curate_objects datasets/objects --curate_general datasets/general --curate_freqs ../word_freqs/gram_freqs.tsv |& tee >(sed $'s/\033[[][^A-Za-z]*[mG]//g' > datasets/object_noun_curated.log)
+
+- Compare the contents of two object noun JSONs:
+	grep -v '"id":' datasets/object_noun_curated.json > /tmp/old.json
+	grep -v '"id":' datasets/object_noun_curated.TEMP.json > /tmp/new.json
+	kompare /tmp/old.json /tmp/new.json

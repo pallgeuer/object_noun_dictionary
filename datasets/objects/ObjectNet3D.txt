@@ -1,0 +1,100 @@
+aeroplane
+ashtray
+backpack
+basket
+bed
+bench
+bicycle
+blackboard
+boat
+bookshelf
+bottle
+bucket
+bus
+cabinet
+calculator
+camera
+can
+cap
+car
+cellphone
+chair
+clock
+coffee maker
+comb
+computer
+cup
+desk lamp
+dining table
+dishwasher
+door
+eraser
+eyeglasses
+fan
+faucet
+filing cabinet
+fire extinguisher
+fish tank
+flashlight
+fork
+guitar
+hair dryer
+hammer
+headphone
+helmet
+iron
+jar
+kettle
+key
+keyboard
+knife
+laptop
+lighter
+mailbox
+microphone
+microwave
+motorbike
+mouse
+paintbrush
+pan
+pen
+pencil
+piano
+pillow
+plate
+pot
+printer
+racket
+refrigerator
+remote control
+rifle
+road pole
+satellite dish
+scissors
+screwdriver
+shoe
+shovel
+sign
+skate
+skateboard
+slipper
+sofa
+speaker
+spoon
+stapler
+stove
+suitcase
+teapot
+telephone
+toaster
+toilet
+toothbrush
+train
+trash bin
+trophy
+tub
+TV, monitor
+vending machine
+washing machine
+watch
+wheelchair

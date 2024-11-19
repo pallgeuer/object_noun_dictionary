@@ -2,11 +2,11 @@
 
 **Author:** Philipp Allgeuer
 
-This repository provides the code for generating the Object Noun Dictionary, an exhaustive collection of simple and compound nouns in the English language (plus alternate spellings, plural forms, and relative word frequencies) as detailed in, and required for, the WACV 2025 paper:
+This repository provides the code for generating the Object Noun Dictionary, an exhaustive collection of simple and compound nouns in the English language (plus alternate spellings, plural forms, and relative word frequencies) as detailed in, and required for, the WACV 2025 paper (also on [paperswithcode](https://paperswithcode.com/paper/unconstrained-open-vocabulary-image)):
 
 Philipp Allgeuer, Kyra Ahrens, and Stefan Wermter: *Unconstrained Open Vocabulary Image Classification: Zero-Shot Transfer from Text to Image via CLIP Inversion*
 
-The aim of the Object Noun Dictionary is to provide a reference dictionary for image classification and/or object detection class labels for computer vision tasks, in particular open vocabulary ones. The final generated dictionary is available at `datasets/object_noun_curated.json`. For instructions how to regenerate the dataset, refer in particular to the `Noun Curation` section of the `commands.txt` file.
+The aim of the Object Noun Dictionary is to provide a reference dictionary for image classification and/or object detection class labels for computer vision tasks, in particular open vocabulary ones. The final generated dictionary is available at `datasets/object_noun_curated.json` (see also [NOVIC Caption-Object Data](https://paperswithcode.com/dataset/novic-caption-object-data) on paperswithcode). For instructions how to regenerate the dataset, refer in particular to the `Noun Curation` section of the `commands.txt` file.
 
 ## Citation
 
